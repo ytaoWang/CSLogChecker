@@ -62,9 +62,11 @@ extern void handleFatalError(const char*,...);
 extern void handleStateError(const char*,...);
 extern void handleDebug(const char*,...);
 
-#define SUCCESSFUL	0
-#define FAILED		-1
+const int  SUCCESSFUL = 0;
 
-#define USING		0
-#define RECYLE		1
+const int FAILED = -1;
+
+const int USING	=	0;
+const int RECYLE = 1;
+
 #endif
