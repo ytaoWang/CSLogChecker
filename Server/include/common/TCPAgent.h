@@ -63,6 +63,8 @@ class TCPAgent:public Agent
     }
     
     void setState(int st);
+    virtual int doTask(void);
+    virtual int doTimer(unsigned int tv);
     
 protected:
     TCPSocket m_tTcpSocket;

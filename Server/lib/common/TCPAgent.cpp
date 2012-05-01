@@ -186,3 +186,13 @@ void TCPAgent::setState(void)
         
     }
 }
+
+int TCPAgent::doTask(void)
+{
+    return SUCCESSFUL;
+}
+
+int TCPAgent::doTimer(unsigned int tv)
+{
+    return SUCCESSFUL;
+}

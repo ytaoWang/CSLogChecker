@@ -23,6 +23,9 @@ Epoll::~Epoll(void)
 {
     if(m_pEpollEvent != NULL)
         delete [] m_pEpollEvent;
+    for(list<struct timer_t *>::iterator aIt = m_vAgentTimer.begin(); aIt != m_vAgentTimer.end();)
+        delete (*it);
+    m_lAgentList.clear();
 }
 
 int Epoll::initialize(unsigned int size)
@@ -87,6 +90,7 @@ int Epoll::delTimer(EpollEvent *ptr,unsigned int time)
     {
         if(**it == t) {
             m_vAgentTimer.erase(it);
+            delete it;
             break;
         }
     }
@@ -127,7 +131,7 @@ int Epoll::getLastTime(void)
 
     if(gettimeofday(&tv,NULL) < 0) {
         handleSyscallError("attachTimer");
-        return FAILED;
+        return TIME_ACCURACY;
     }
  
     make_heap(m_vAgentTimer.begin(),m_vAgentTimer.end(),CompareTimer());
@@ -141,7 +145,7 @@ void Epoll::doTask(void)
 {
     for(std::list<EpollEvent *>::iterator it = m_lAgengList.begin();it != m_lAgentList.end();++it)
     {
-        //   (*it)->doTask();
+        (*it)->doTask();
     }
 }
 
@@ -175,6 +179,126 @@ void Epoll::doTimer(void)
 
 void Epoll::run(void)
 {
+    int nfds = 0;
+    EpollEvent *pEpollEvent = NULL;
+    int timeout;
+    
+    while(true)
+    {
+        timeout = getLastTime();
+        if(timeout < 0)
+        {
+            this->doTimer();
+            continue;
+        }
+        
+        if((nfds = epoll_wait(m_iEpollFd,m_pEpollEvent,m_iEventSize,timeout)) < 0)
+        {
+            if(errno == EINTR) continue;
+            else 
+                handleSyscallError("Epoll::epoll_wait");
+        }
+        
+        for(int i = 0;i < nfds;i++)
+        {
+            pEpollEvent = static_case<EpollEvent *>(m_pEpollEvent[i].data.ptr);
+            if(!event)
+                goto _task;
+            Agent *agent = pEpollEvent->getHandler();
+            if(!pAgent)
+                goto _task;
+            if(m_pEpollEveent[i].events & EPOLLERR || m_pEpollEvents[i].events & EPOLLHUP)
+            {
+                if(agent->getState() == CONNECTING)
+                {
+                    if(agent->getErrno() == EISCONN)
+                    {
+                        agent->setState(CONNECTED);
+                        if(agent->connectAfter(true) < 0)
+                        {
+                            delete agent;
+                            continue;
+                        }
+                        agent->resetConnect();
+                        continue;
+                    } else 
+                    {
+                        if(agent->allowReconnect())
+                        {
+                            SocketAddress addr;
+                            if(SUCCESSFUL == (agent->getOppAddr(addr)))
+                            {
+                                if(agent->connect(addr) < 0)
+                                {
+                                    delete agent;
+                                }
+                            }
+                            else 
+                            {
+                                handleError("get peer address error");
+                                delete agent;
+                            }
+
+                            continue;
+                        }
+                        else
+                        {
+                            agent->resetConnect();
+                            if(agent->connectAfter(false) < 0)
+                            {
+                                handleError("connect error");
+                                delete agent;
+                                continue;
+                            }
+                            else continue;
+                        }
+                    }
+                } else 
+                {
+                    if(agent->recvData() < 0)
+                    {
+                        handleError("agent recvData");
+                        delete agent;
+                        continue;
+                    }
+                    
+                }
+            }
+            if(m_pEpollEvent[i].events & EPOLLOUT)
+            {
+                if(CONNECTED == agent->getState())
+                {
+                    if(agent->sendData() < 0)
+                    {
+                        delete agent;
+                        continue;
+                    }
+                    
+                } else 
+                {
+                    agent->setState(CONNECTED);
+                    if(agent->connectAfter(true) < 0)
+                    {
+                        delete agent;
+                        continue;
+                    }
+                    
+                }
+            }
+            
+            if(m_pEpollEvent[i].events & EPOLLIN)
+            {
+                if(agent->recvData() < 0)
+                {
+                    delete agent;
+                    continue;
+                }
+                
+            }
+        }
+    _task:
+        this->doTask();
+    }
     
 }
 
