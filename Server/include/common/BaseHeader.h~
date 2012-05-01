@@ -1,0 +1,17 @@
+#ifndef __BASE_HEADER_H_
+#define __BASE_HEADER_H_
+
+#include <sys/types.h>
+#include <stdint.h>
+
+const int CONNECTING = 0;
+const int CONNECTED = 1;
+const int CONNECTFAILED = -1;
+const int MAXRECONNECTTIMES = 3;
+
+const int IPV4 = 4;
+const int IPV6 = 6;
+
+
+
+#endif

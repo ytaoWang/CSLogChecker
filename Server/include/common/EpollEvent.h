@@ -13,8 +13,9 @@ class EpollEvent
     int  m_iFd;
     unsigned int m_iTTEvent;
     unsigned int m_iTv;
+    bool m_bPersist;
  public:
- EpollEvent():m_iEpollEvent(0),m_iTTEvent(0),m_pHandler(NULL),m_pEpoll(NULL),m_iFd(-1),tv(0)
+ EpollEvent():m_iEpollEvent(0),m_iTTEvent(0),m_pHandler(NULL),m_pEpoll(NULL),m_iFd(-1),tv(0),m_bPersist(false)
     {
 
     }
@@ -22,6 +23,16 @@ class EpollEvent
     void setEpoll(Epoll *epl)
     {
         m_pEpoll = epl;
+    }
+    
+    void setPersist(bool p)
+    {
+        m_bPersist = p;
+    }
+    
+    bool isPersist(void) const
+    {
+        return m_bPersist;
     }
     
     Epoll* getEpoll(void)

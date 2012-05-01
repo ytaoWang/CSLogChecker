@@ -1,0 +1,19 @@
+#ifndef __BASETASK_H_
+#define __BASETASK_H_
+
+class BaseReq;
+
+class BaseTask
+{
+ public:
+    BaseTask() {}
+    virtual ~BaseTask() {}
+    virtual int recvReq(BaseRequest *);
+    virtual void readBack(InReq& req) {}
+    virtual void writeBack(bool result) {}
+    
+};
+
+
+
+#endif

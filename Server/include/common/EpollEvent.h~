@@ -1,0 +1,10 @@
+#ifndef __EPOLL_EVENT_H_
+#define __EPOLL_EVENT_H_
+
+class Agent;
+class EpollEvent
+{
+    
+};
+
+#endif

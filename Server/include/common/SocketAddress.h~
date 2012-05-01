@@ -1,0 +1,27 @@
+#ifndef __SOCKETADDRESS_H_
+#define __SOCKETADDRESS_H_
+
+#include <string>
+#include <netinet/in.h>
+
+#include "BaseHeader.h"
+
+class SocketAddress
+{
+ public:
+    SocketAddress(unsigned short port);
+    SocketAddres(const char *buf,unsigned short port);
+    
+    const char* getIP(void) const
+    {
+        return m_strIp.c_str();
+    }
+    
+    unsigned short getPort(void) const
+    {
+        return m_iPort;
+    }
+    
+}
+
+#endif

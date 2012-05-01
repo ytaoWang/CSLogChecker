@@ -1,0 +1,175 @@
+
+
+#include "BaseTask.h"
+#include "BufferManager.h"
+#include "TCPAgent.h"
+#include "UDPAgent.h"
+
+BufferManager::BufferManager():m_pLastIov(NULL),
+                               m_pAgent(NULL),
+                               m_iOffset(0),
+                               m_iLen(0),
+                               m_bReadHead(false),
+                               m_bInit(false)
+{}
+
+int BufferManager::writeDynamic(char *buf,size_t len,BaseTask *pTask)
+{
+    struct iov_req iov(buf,len,pTask);
+    m_lIovList.push_back(iov);
+    return SUCCESSFUL;
+}
+
+int BufferManager::writeDynamic(char *buf,size_t len,SocketAddress &addr,BaseTask *pTask)
+{
+    struct iov_req iov(buf,len,pTask);
+    
+    if(!addr.getAddr(iov.m_UDPAddr))
+        return FAILED;
+    
+    m_lIovList.push_back(iov);
+    
+    return SUCCESSFUL;
+}
+
+
+int BufferManager::write(UDPSocket& sock)
+{
+    list<iov_req>::iterator aIt,pIt;
+    int ret = -1;
+    
+    aIt = m_lIovList.begin();
+    int download = 0 ;
+    
+    for(;aIt != m_lIovList.end();)
+    {
+        pIt = aIt;
+        ret = sock.writeSocket((char *)(pIt->m_Iov.iov_base),pIt->m_Iov.iov_len,pIt->m_UDPAddr);
+        if(ret < 0) 
+        {
+            if( EINTR == errno)
+                continue;
+            if(errno == EWOULDBLOCK)
+                return SUCCESSFUL;
+            else 
+            {
+                handleError("BufferManager::write(UDPScoket & sock)");
+                if(pIt->m_pTask)
+                    pIt->m_pTask->writeBack(false);
+                else 
+                {
+                    if(m_pAgent) 
+                        m_pAgent->writeBack(false);
+                    else
+                        handleError("BufferManager don't be relate with a Agent");
+                }
+                
+                return FAILED;
+            }
+        }
+        
+        download += ret;
+        if((size_t)ret < pIt->m_Iov.iov_len)
+        {
+            pIt->m_Iov.iov_base = (void *)(((char *)(pIt->m_Iov.iov_base)) + ret);
+            pIt->m_Iov.iov_len -= (size_t)ret;
+            pIt->m_bComplete = false;
+            m_pLastIov = pIt->m_Iov.iov_base;
+            break;
+        }
+        else 
+        {
+            if(pIt->m_bComplete)
+            {
+                if(pIt->m_Iov.iov_base)
+                {
+                    delete [](char *)(pIt->m_Iov.iov_base);
+                    pIt->m_Iov.iov_base = NULL;
+                }
+            } else {
+                if(m_pLastIov)
+                {
+                    delete [](char *)m_pLastIov;
+                    m_pLastIov = NULL;
+                }
+            }
+            
+            ++aIt;
+            m_lIovList.erase(pIt);
+            if(pIt->m_pTask)
+                pIt->m_pTask->writeBack(true);
+            else 
+            {
+                if(m_pAgent)
+                    m_pAgent->writeBack(true);
+                else
+                {
+                    handleError("BufferManager don't be relate with a agent");
+                    return FAILED;
+                }
+            }
+            
+        }
+    }
+    
+    return download;
+}
+
+
+int BufferManager::write(TCPSocket &sock)
+{
+    const unsigned int reqlen = (unsigned int)m_lIovList.size();
+    struct iovec outdata[reqlen];
+    
+    memset(outdata,0,reqlen * sizeof(struct iovec));
+    
+    list<iov_req>::iterator aIt,pIt;
+    aIt = m_lIovList.begin();
+    unsigned int num = 0;
+    
+    while( aIt != m_lIovList.end())
+    {
+        outdata[num].iov_base = aIt->m_Iov.iov_base;
+        outdata[num].iov_len = aIt->m_Iov.iov_len;
+        ++num;
+        ++aIt;
+    }
+    
+    int ret = -1;
+    while((ret = sock.writevSocket(outdata,reqlen)) < 0)
+    {
+        if(errno == EINTR)
+            continue;
+        if( (errno != EWOULDBLOCK) || (errno != EAGAIN))
+        {
+            handleWriteError();
+            return FAILED;
+        }
+    }
+    
+    int download = ret;
+    aIt = m_lIovList.begin();
+    while(ret > 0 && aIt != m_lIovList.end())
+    {
+        pIt = aIt++;
+        if((unsigned int) ret >= pIt->m_Iov.iov_len)
+        {
+            ret -= pIt->m_Iov.iov_len;
+            if(pIt->m_bComplete)
+            {
+                if(pIt->m_lIov.iov_base)
+                {
+                    delete [](char *)(pIt->m_lIov.iov_base);
+                    pIt->m_lIov.iov_base = NULL;
+                }
+            } else {
+                
+            }
+            
+            
+        }
+        
+        
+    }
+    
+}

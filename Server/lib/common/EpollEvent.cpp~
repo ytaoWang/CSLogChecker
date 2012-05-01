@@ -1,0 +1,13 @@
+#include <sys/epoll.h>
+
+#include "EpollEvent.h"
+
+const int TIMER_EVENT = 1<<0;
+const int TIMER_TASK = 1<<1;
+const int LEVENTREVENT = EPOLLIN;
+const int 
+
+EpollEvent::openREvent(void)
+{
+    if(m_iEpollEvent)
+}
