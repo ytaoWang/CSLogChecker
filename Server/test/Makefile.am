@@ -1,0 +1,8 @@
+#AM_FLAGS = -I$(top_srcdir)/include/common
+#lib_LIBRARIES = libtest.a
+#libtest_a_SOURCES = \
+	test.cpp
+bin_PROGRAMS = cslcserver
+cslcserver_SOURCES = test.cpp
+cslcserver_LDADD = $(top_srcdir)/lib/common/libcomm.a
+AM_CPPFLAGS = -I$(top_srcdir)/include/common -lpthread
