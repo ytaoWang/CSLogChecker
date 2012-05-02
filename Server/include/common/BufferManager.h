@@ -9,10 +9,14 @@
 #include <cstring>
 
 #include "BaseReq.h"
+#include "BaseHeader.h"
+#include "Error.h"
 
-class TCPAgent;
+class TCPSocket;
 class UDPSocket;
 class BaseTask;
+class SocketAddress;
+class Agent;
 
 class BufferManager 
 {
@@ -40,18 +44,18 @@ class BufferManager
     int writeDynamic(char *,size_t len,BaseTask * = NULL);
     int writeDynamic(char *,size_t len,SocketAddress &,\
                      BaseTask * = NULL);
-    int write(const TCPSocket &);
-    int write(const UDPSocket &);
+    int write(TCPSocket &);
+    int write(UDPSocket &);
     
-    int read(const TCPSocket &);
-    int read(const UDPSocket &);
+    int read(TCPSocket &);
+    int read(UDPSocket &);
     
     void setAgent(Agent *agent)
     {
         m_pAgent = agent;
     }
     void handleWriteError(void);
-    void clear(void);
+    int clear(void);
     size_t getLength(void) const
     {
         return m_lIovList.size();

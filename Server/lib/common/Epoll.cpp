@@ -13,8 +13,15 @@
 #include <errno.h>
 #include <sys/time.h>
 
+#include <algorithm>
+
 #include "Epoll.h"
+#include "EpollEvent.h"
 #include "Error.h"
+#include "CSLC_const.h"
+#include "SocketAddress.h"
+
+using namespace std;
 
 Epoll::Epoll(void):m_iEpollFd(-1),m_iEventSize(0),m_pEpollEvent(NULL)
 {}
@@ -23,8 +30,8 @@ Epoll::~Epoll(void)
 {
     if(m_pEpollEvent != NULL)
         delete [] m_pEpollEvent;
-    for(list<struct timer_t *>::iterator aIt = m_vAgentTimer.begin(); aIt != m_vAgentTimer.end();)
-        delete (*it);
+    for(vector<struct Timer_t *>::iterator aIt = m_vAgentTimer.begin(); aIt != m_vAgentTimer.end();)
+        delete (*aIt);
     m_lAgentList.clear();
 }
 
@@ -61,7 +68,7 @@ int Epoll::doEvent(EpollEvent *ptr,int fd,int op,unsigned int events)
 
 int Epoll::attachTimer(EpollEvent *ptr,unsigned int time)
 {
-    struct timer_t *handler = new struct timer_t;
+    struct Timer_t *handler = new struct Timer_t;
     struct timeval tv;
 
     if(gettimeofday(&tv,NULL) < 0) {
@@ -80,17 +87,17 @@ int Epoll::attachTimer(EpollEvent *ptr,unsigned int time)
 
 int Epoll::delTimer(EpollEvent *ptr,unsigned int time)
 {
-    struct timer_t t;
+    struct Timer_t t;
 
     t.ptr = ptr;
     t.time = time;
     
-    for(vector<struct timer_t *>::iterator it = m_vAgentTimer.begin();\
+    for(vector<struct Timer_t *>::iterator it = m_vAgentTimer.begin();\
         it != m_vAgentTimer.end();++it)
     {
         if(**it == t) {
             m_vAgentTimer.erase(it);
-            delete it;
+            delete (*it);
             break;
         }
     }
@@ -111,7 +118,7 @@ int Epoll::attachTask(EpollEvent *ptr)
 
 int Epoll::delTask(EpollEvent *ptr)
 {
-    for(list<EpollEvent*>::it = m_lAgentList.begin();it != m_lAgentList.end();++it)
+    for(list<EpollEvent*>::iterator it = m_lAgentList.begin();it != m_lAgentList.end();++it)
     {
         if(*it == ptr) 
         {
@@ -131,10 +138,10 @@ int Epoll::getLastTime(void)
 
     if(gettimeofday(&tv,NULL) < 0) {
         handleSyscallError("attachTimer");
-        return TIME_ACCURACY;
+        return TIMER_ACCURACY;
     }
  
-    make_heap(m_vAgentTimer.begin(),m_vAgentTimer.end(),CompareTimer());
+    make_heap(m_vAgentTimer.begin(),m_vAgentTimer.end(),Epoll::CompareTimer());
     
     now = tv.tv_sec * 1000 + tv.tv_usec/1000;
     
@@ -143,9 +150,12 @@ int Epoll::getLastTime(void)
 
 void Epoll::doTask(void)
 {
-    for(std::list<EpollEvent *>::iterator it = m_lAgengList.begin();it != m_lAgentList.end();++it)
+    Agent *pAgent;
+    
+    for(std::list<EpollEvent *>::iterator it = m_lAgentList.begin();it != m_lAgentList.end();++it)
     {
-        (*it)->doTask();
+        pAgent = (*it)->getHandler();
+        pAgent->doTask();
     }
 }
 
@@ -153,10 +163,12 @@ void Epoll::doTask(void)
 void Epoll::doTimer(void)
 {
     unsigned long now;
-
+    Agent *pAgent;
+    struct timeval tv;
+    
     if(gettimeofday(&tv,NULL) < 0) {
         handleSyscallError("attachTimer");
-        return FAILED;
+        return;
     }
 
     now = tv.tv_sec * 1000 + tv.tv_usec/1000;
@@ -164,8 +176,9 @@ void Epoll::doTimer(void)
     for(vector<struct Timer_t *>::iterator it = m_vAgentTimer.begin(); it != m_vAgentTimer.end();++it)
     {
         if((*it)->absolute <= now || ((*it)->absolute - now) < TIMER_ACCURACY) {
-            (*it)->ptr->doTimer((*it)->time);
-            if((*it)->ptr->isPersistTimer()) {
+            pAgent = (*it)->ptr->getHandler();
+            pAgent->doTimer((*it)->time);
+            if((*it)->ptr->isPersist()) {
                 //update absolute
                 (*it)->absolute = now + (*it)->time;
             } else {
@@ -201,13 +214,13 @@ void Epoll::run(void)
         
         for(int i = 0;i < nfds;i++)
         {
-            pEpollEvent = static_case<EpollEvent *>(m_pEpollEvent[i].data.ptr);
-            if(!event)
+            pEpollEvent = static_cast<EpollEvent *>(m_pEpollEvent[i].data.ptr);
+            if(!pEpollEvent)
                 goto _task;
             Agent *agent = pEpollEvent->getHandler();
-            if(!pAgent)
+            if(!agent)
                 goto _task;
-            if(m_pEpollEveent[i].events & EPOLLERR || m_pEpollEvents[i].events & EPOLLHUP)
+            if(m_pEpollEvent[i].events & EPOLLERR || m_pEpollEvent[i].events & EPOLLHUP)
             {
                 if(agent->getState() == CONNECTING)
                 {

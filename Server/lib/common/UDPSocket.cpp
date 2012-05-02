@@ -8,7 +8,8 @@
 #include <cstring>
 #include <cstdio>
 
-#include "SockAddress.h"
+#include "SocketAddress.h"
+#include "BaseHeader.h"
 #include "Error.h"
 #include "CSLC_const.h"
 #include "UDPSocket.h"
@@ -18,7 +19,7 @@ int UDPSocket::m_iIpType = IPV4;
 UDPSocket::UDPSocket():m_iSockFd(-1)
 {}
 
-int UDPSocket::bindAddr(const SocketAddress& addr)
+int UDPSocket::bindAddr(const SocketAddress& serveraddr)
 {
     if( m_iIpType == IPV4)
     {
@@ -51,7 +52,7 @@ int UDPSocket::bindAddr(const SocketAddress& addr)
         memset(&addr,0,sizeof(addr));
         addr.sin6_family = PF_INET6;
         addr.sin6_scope_id = 2;
-        if( server.ifAnyAddr())
+        if( serveraddr.ifAnyAddr())
             addr.sin6_addr = in6addr_any;
         else
         {
@@ -68,7 +69,7 @@ int UDPSocket::bindAddr(const SocketAddress& addr)
             handleError("UDPSocket::getPort");
             return FAILED;
         }
-        addr.sin_port = htons(serveraddr.getPort());
+        addr.sin6_port = htons(serveraddr.getPort());
         if(bind(m_iSockFd,(const struct sockaddr *)&addr,sizeof(addr)) <0)
         {
             handleSyscallError("UDPSocket::bindAddr");

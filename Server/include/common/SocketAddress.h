@@ -21,7 +21,7 @@ class SocketAddress
  public:
     SocketAddress(unsigned short port);
     SocketAddress();
-    SocketAddres(const char *buf,unsigned short port);
+    SocketAddress(const char *buf,unsigned short port);
     
     const char* getIP(void) const
     {
@@ -36,10 +36,10 @@ class SocketAddress
     sockaddr_in getAddr(void);
     bool getAddr(sockaddr_in &addr);
     void setPort(unsigned short port);
-    const string &convertToString(void);
+    const std::string &convertToString(void);
     bool ifAnyAddr(void) const;
     bool operator==(const SocketAddress&) const;
-    ScoketAddress& operator = (const SocketAddress&);
+    SocketAddress& operator = (const SocketAddress&);
     SocketAddress(const SocketAddress &addr);
     
  private:

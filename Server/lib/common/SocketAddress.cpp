@@ -1,10 +1,14 @@
-#include <string.h>
+#include <cstring>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <stdio.h>
+#include <cstdio>
 
 #include <string>
+
+#include "SocketAddress.h"
+#include "Error.h"
+#include "BaseHeader.h"
 
 using namespace std;
 
@@ -13,7 +17,7 @@ const int IPV6LEN = 39;
 const int MAXSOCKADDRLEN = 100;
 const char *ANYADDR = "0";
 
-int SocketAddress::ipType = IPV4;
+int SocketAddress::m_iIpType = IPV4;
 
 SocketAddress::SocketAddress():m_iPort(0),m_strStr("")
 {
@@ -23,8 +27,10 @@ SocketAddress::SocketAddress():m_iPort(0),m_strStr("")
         m_strIp = IPV6ANYADDR;
 }
 
-SocketAddress::SocketAddress(unsigned short port):SocketAddress(),m_iPort(port)
+SocketAddress::SocketAddress(unsigned short port)
 {
+    SocketAddress();
+    m_iPort = port;
 }
 
 SocketAddress::SocketAddress(const char *buf,unsigned short port)
@@ -80,25 +86,25 @@ bool SocketAddress::ifAnyAddr(void) const
         if(IPV4ANYADDR == m_strIp)
             return true;
         else return false;
-    else if(IPV6ANYADDR == ip)
+    else if(IPV6ANYADDR == m_strIp)
         return true;
     else return false;
 }
 
 bool SocketAddress::operator == (const SocketAddress &h) const
 {
-    if(m_strIp == h.m_strIP && m_iPort == h.m_iPort)
+    if(m_strIp == h.m_strIp && m_iPort == h.m_iPort)
         return true;
     else 
         return false;
 }
 
-SocketAddress& ScoketAddress:::operator= (const SocketAddress &h)
+SocketAddress& SocketAddress::operator= (const SocketAddress &h)
 {
     if(this == &h)
         return *this;
     
-    m_strIp = h.m_strIP;
+    m_strIp = h.m_strIp;
     m_iPort = h.m_iPort;
     m_strStr = h.m_strStr;
     
@@ -126,8 +132,8 @@ bool SocketAddress::getAddr(sockaddr_in &addr)
     return inet_pton(AF_INET,m_strIp.c_str(),&addr.sin_addr) == 1;
 }
 
-const SocketAddress(const SocketAddress &addr):addr.m_strIp(m_strIp),\
-    add.m_iPort(m_iPort),\
-    addr.m_strStr(m_strStr)
-{
+SocketAddress::SocketAddress(const SocketAddress &addr) {
+    this->m_strIp = addr.m_strIp;
+    this->m_iPort = addr.m_iPort;
+    this->m_strStr = addr.m_strStr;
 }

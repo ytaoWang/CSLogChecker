@@ -11,6 +11,13 @@
 #ifndef __AGENT_H_
 #define __AGENT_H_
 
+#include "Error.h"
+#include "BaseHeader.h"
+
+class BaseRequest;
+class InReq;
+class SocketAddress;
+
 class Agent 
 {
  public:
@@ -93,13 +100,13 @@ class Agent
     
     int allowReconnect(void) const
     {
-        if(m_iConnectTImes < MAXRECONNECTTIMES)
+        if(m_iConnectTimes < MAXRECONNECTTIMES)
             return true;
         else 
             return false;
     }
     
-    int getConnectTimes(void) const;
+    int getConnectTimes(void) const
     {
         return m_iConnectTimes;
     }

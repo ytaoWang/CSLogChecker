@@ -1,9 +1,13 @@
-
+#include <errno.h>
 
 #include "BaseTask.h"
 #include "BufferManager.h"
-#include "TCPAgent.h"
-#include "UDPAgent.h"
+#include "TCPSocket.h"
+#include "UDPSocket.h"
+#include "Error.h"
+#include "SocketAddress.h"
+#include "Agent.h"
+using namespace std;
 
 BufferManager::BufferManager():m_pLastIov(NULL),
                                m_pAgent(NULL),
@@ -33,7 +37,7 @@ int BufferManager::writeDynamic(char *buf,size_t len,SocketAddress &addr,BaseTas
 }
 
 
-int BufferManager::write(const UDPSocket& sock)
+int BufferManager::write(UDPSocket& sock)
 {
     list<iov_req>::iterator aIt,pIt;
     int ret = -1;
@@ -116,7 +120,7 @@ int BufferManager::write(const UDPSocket& sock)
 }
 
 
-int BufferManager::write(const TCPSocket &sock)
+int BufferManager::write(TCPSocket &sock)
 {
     const unsigned int reqlen = (unsigned int)m_lIovList.size();
     struct iovec outdata[reqlen];
@@ -157,10 +161,10 @@ int BufferManager::write(const TCPSocket &sock)
             ret -= pIt->m_Iov.iov_len;
             if(pIt->m_bComplete)
             {
-                if(pIt->m_lIov.iov_base)
+                if(pIt->m_Iov.iov_base)
                 {
                     delete [](char *)(pIt->m_Iov.iov_base);
-                    pIt->m_lIov.iov_base = NULL;
+                    pIt->m_Iov.iov_base = NULL;
                 }
             } else {
                 if(m_pLastIov)
@@ -191,7 +195,7 @@ int BufferManager::write(const TCPSocket &sock)
                 m_pLastIov = pIt->m_Iov.iov_base;
                 pIt->m_bComplete = false;
             }
-            pIt->m_Iov.iov_base = (void *)((char *)(pIt->m_Iov.iov_base + ret));
+            pIt->m_Iov.iov_base = (void *)(((char *)pIt->m_Iov.iov_base + ret));
             pIt->m_Iov.iov_len -= (unsigned int)ret;
             break;
         }
@@ -200,7 +204,7 @@ int BufferManager::write(const TCPSocket &sock)
     return download;
 }
 
-int BufferManager::read(const TCPSocket &sock)
+int BufferManager::read(TCPSocket &sock)
 {
     int ret;
     
@@ -240,9 +244,10 @@ int BufferManager::read(const TCPSocket &sock)
                     m_bReadHead = false;
                 } else if(m_iLen == 0)
                 {
+                    m_InReq.ioBuf = NULL;
                     if(m_pAgent)
                     {
-                        m_pAgent->readBack(true);
+                        m_pAgent->readBack(m_InReq);
                         this->m_bInit = true;
                     }
                     this->m_bReadHead = true;
@@ -294,12 +299,12 @@ int BufferManager::read(const TCPSocket &sock)
     }
 }
 
-int BufferManager::read(const UDPSocket &sock)
+int BufferManager::read(UDPSocket &sock)
 {
     int ret ;
     
     m_InReq.ioBuf = NULL;
-    memset(&m_InReq.m_msgHeader,0,HEAD_SIZE);
+    memset(&m_InReq.m_msgHeader,0,HEADER_SIZE);
     m_iLen = HEADER_SIZE;
     
     if((ret = sock.readSocket(((char *)(&m_InReq.m_msgHeader)),HEADER_SIZE,m_InReq.oppoAddr)) < 0)
@@ -317,8 +322,9 @@ int BufferManager::read(const UDPSocket &sock)
     m_iLen = m_InReq.m_msgHeader.length;
     if(m_iLen == 0)
     {
+        m_InReq.ioBuf = NULL;
         if(m_pAgent)
-            m_pAgent->readBack(true);
+            m_pAgent->readBack(m_InReq);
 
         return SUCCESSFUL;
     }
@@ -337,7 +343,7 @@ int BufferManager::read(const UDPSocket &sock)
     }
     
     if(m_pAgent)
-        m_pAgent->readBack(true);
+        m_pAgent->readBack(m_InReq);
     else
         handleError("BufferManager don't be relate with a Agent");
 
@@ -347,7 +353,7 @@ int BufferManager::read(const UDPSocket &sock)
     return SUCCESSFUL;
 }
 
-void BufferManager::handleWriteError()
+void BufferManager::handleWriteError(void)
 {
     list<iov_req>::iterator aIt = m_lIovList.begin();
     while(aIt != m_lIovList.end())

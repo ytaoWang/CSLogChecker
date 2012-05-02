@@ -23,7 +23,7 @@ class TCPAgent:public Agent
     virtual ~TCPAgent();
     int connect(const SocketAddress &);
     virtual int init();
-    virtual int recyler(void);
+    virtual int recycler(void);
     virtual int sendData(void);
     virtual int recvData(void);
     virtual int doParse(void)
@@ -45,7 +45,7 @@ class TCPAgent:public Agent
     }
     
     virtual int connectAfter(bool);
-    int writeDynData(char *buf,size_t len,BaseTask *= NULL);
+    int writeDynData(char *buf,size_t len,BaseTask *pTask = NULL);
     int writeData(void);
     
     int readData(void);

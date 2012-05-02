@@ -12,7 +12,7 @@ public:
     virtual ~Epoll(void);
     int getEpollFd(void) const
     {
-        return m_iEventFd;
+        return m_iEpollFd;
     }
     
     int initialize(unsigned int);
@@ -34,7 +34,7 @@ private:
     {
         EpollEvent *ptr;
         unsigned int time;
-        Timer_t::Timer_t(void),ptr(NULL),time(0)
+    	Timer_t():ptr(NULL),time(0)
         {}
         bool operator==(const Timer_t&t) const 
         {
@@ -46,19 +46,18 @@ private:
         }
         
         unsigned long absolute;
-    };
+    };    
 
     class CompareTimer 
     {
     public:
         //for min_heap
-        bool operator()(const struct Timer_t *&t1 const struct Timer_t *&t2) const 
+        bool operator()(struct Timer_t *&t1, struct Timer_t *&t2) const 
         {
             return !(*t1 < *t2);
         }
     };
     
-
     struct epoll_event* m_pEpollEvent;
     int m_iEpollFd;
     unsigned int  m_iEventSize;

@@ -1,6 +1,8 @@
 #include <sys/epoll.h>
 
 #include "EpollEvent.h"
+#include "Epoll.h"
+#include "Error.h"
 
 const int TIMER_EVENT = 1<<0;
 const int TIMER_TASK = 1<<1;
@@ -17,7 +19,7 @@ int EpollEvent::openREvent(void)
     if(-1 == m_iFd)
         return SUCCESSFUL;
     
-    if(m_iEpollEvent & LEVELREVENT) return;
+    if(m_iEpollEvent & LEVELREVENT) return SUCCESSFUL;
     
     if(m_pEpoll->doEvent(this,m_iFd,EVENTCHANGE,m_iEpollEvent | LEVELREVENT) < 0)
     {
@@ -104,7 +106,7 @@ int EpollEvent::registerREvent(void)
     return SUCCESSFUL;
 }
 
-int EpolLEvent::unregisterREvent(void)
+int EpollEvent::unregisterREvent(void)
 {
     if(-1 == m_iFd) return FAILED;
     
@@ -155,7 +157,7 @@ int EpollEvent::unregisterWEvent(void)
     return SUCCESSFUL;    
 }
 
-int EpollEvent::reigsterRWEvent(void)
+int EpollEvent::registerRWEvent(void)
 {
     if( -1 == m_iFd)
         return SUCCESSFUL;
@@ -186,7 +188,7 @@ int EpollEvent::unregisterRWEvent(void)
     else if(!(m_iEpollEvent & LEVELWEVENT))
         return unregisterREvent();
     
-    if(m_pEpollEvent->doEvent(this,m_iFd,EVENTDEL,LEVELRWEVENT) < 0)
+    if(m_pEpoll->doEvent(this,m_iFd,EVENTDEL,LEVELRWEVENT) < 0)
     {
         handleError("EpollEvent::unregisterRWEvent");
         return FAILED;
@@ -194,7 +196,7 @@ int EpollEvent::unregisterRWEvent(void)
     
     m_iEpollEvent &= ~LEVELRWEVENT;
     
-    return SUCCSSFUL;
+    return SUCCESSFUL;
 }
 
 
@@ -203,7 +205,7 @@ int EpollEvent::registerTimer(unsigned int tv)
     if(!tv) return FAILED;
     if(m_iTTEvent & TIMER_EVENT) return SUCCESSFUL;
     
-    if(m_pEpollEvent->attachTimer(this,tv)  < 0)
+    if(m_pEpoll->attachTimer(this,tv)  < 0)
     {
         handleError("EpollEvent::registerTimer");
         return FAILED;
@@ -215,11 +217,13 @@ int EpollEvent::registerTimer(unsigned int tv)
     return SUCCESSFUL;
 }
 
-int EpollEvent::unregisterTimer(void)
+int EpollEvent::unregisterTimer(unsigned int tv)
 {
+    if(!tv) return SUCCESSFUL;
+    
     if(!(m_iTTEvent & TIMER_EVENT)) return SUCCESSFUL;
     
-    if(m_pEpollEvent->delTimer(this,tv)  < 0)
+    if(m_pEpoll->delTimer(this,tv)  < 0)
     {
         handleError("EpollEvent::registerTimer");
         return FAILED;
@@ -234,7 +238,7 @@ int EpollEvent::registerTask(void)
 {
     if(m_iTTEvent & TIMER_TASK) return SUCCESSFUL;
     
-    if(m_pEpollEvent->attachTask(this)  < 0)
+    if(m_pEpoll->attachTask(this)  < 0)
     {
         handleError("EpollEvent::registerTimer");
         return FAILED;
@@ -249,7 +253,7 @@ int EpollEvent::unregisterTask(void)
 {
     if(!(m_iTTEvent & TIMER_TASK)) return SUCCESSFUL;
     
-    if(m_pEpollEvent->delTask(this)  < 0)
+    if(m_pEpoll->delTask(this)  < 0)
     {
         handleError("EpollEvent::registerTimer");
         return FAILED;

@@ -1,7 +1,7 @@
 #ifndef __BASETASK_H_
 #define __BASETASK_H_
 
-#include "CSLC_const.h"
+#include "Error.h"
 
 class BaseReq;
 class BaseRequest;

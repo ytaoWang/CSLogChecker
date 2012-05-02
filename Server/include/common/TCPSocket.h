@@ -11,10 +11,10 @@ class TCPSocket
  public:
     TCPSocket();
     TCPSocket(int fd);
-    int readSocket(char* buf,size_t len) const;
-    int readnSocket(char *vptr,unsigned int n) const;
-    int writeSocket(const char *buf,size_t len)const;
-    int writevSocket(const struct iovec *v,size_t len) const;
+    int readSocket(char* buf,size_t len);
+    int readnSocket(char *vptr,unsigned int n);
+    int writeSocket(const char *buf,size_t len);
+    int writevSocket(const struct iovec *v,size_t len);
     int generateSocket(void);
     int setNonblock(void);
     int enableReuseaddr(void);
@@ -30,10 +30,10 @@ class TCPSocket
     int acceptConnection(SocketAddress &);
     int closeSocket(void);
     int setKeepAlive(void);
-    int connectSocket(const struct SocketAddress& addr);
+    int connectSocket(struct SocketAddress& addr);
     //for debug
     int peek(char* buf,size_t size);
-    void throwData(unsigned int size);
+    int throwData(unsigned int size);
 };
 
 

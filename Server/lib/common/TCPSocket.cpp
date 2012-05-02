@@ -15,10 +15,11 @@
 #include "TCPSocket.h"
 #include "SocketAddress.h"
 #include "CSLC_const.h"
+#include "BaseHeader.h"
 
 int TCPSocket::m_iIpType = IPV4;
 
-TCPSocket::TCPSocket():m_iSockFd(-1);
+TCPSocket::TCPSocket():m_iSockFd(-1)
 {
 }
 
@@ -200,7 +201,7 @@ int TCPSocket::bindAddr(SocketAddress &serveraddr)
         memset(&addr,0,sizeof(addr));
         addr.sin6_family = PF_INET6;
         addr.sin6_scope_id = 2;
-        if( server.ifAnyAddr())
+        if( serveraddr.ifAnyAddr())
             addr.sin6_addr = in6addr_any;
         else
         {
@@ -217,7 +218,7 @@ int TCPSocket::bindAddr(SocketAddress &serveraddr)
             handleError("TCPSocket::getPort");
             return FAILED;
         }
-        addr.sin_port = htons(serveraddr.getPort());
+        addr.sin6_port = htons(serveraddr.getPort());
         if(bind(m_iSockFd,(const struct sockaddr *)&addr,sizeof(addr)) <0)
         {
             handleSyscallError("TCPSocket::bindAddr");
@@ -229,7 +230,7 @@ int TCPSocket::bindAddr(SocketAddress &serveraddr)
 
 int TCPSocket::listenOn(int qs)
 {
-    if(listent(m_iSockFd,qs)< 0)
+    if(listen(m_iSockFd,qs)< 0)
     {
         handleSyscallError("TCPSocket::listenOn");
         return FAILED;
@@ -273,13 +274,13 @@ int TCPSocket::setKeepAlive(void)
     if(setsockopt(m_iSockFd,SOL_SOCKET,SO_KEEPALIVE,(const void *) &val,sizeof(val)) < 0)
     {
         handleSyscallError("TCPSocket::setKeepAlive");
-        return FIALED;
+        return FAILED;
     }
         
     return SUCCESSFUL;
 }
 
-int TCPSocket::connectSocket(const struct SocketAddress& ipaddr)
+int TCPSocket::connectSocket(struct SocketAddress& ipaddr)
 {
     int ret = -1;
     
@@ -303,7 +304,7 @@ int TCPSocket::connectSocket(const struct SocketAddress& ipaddr)
             handleError("TCPSocket::connectSocket getAddr error");
             return FAILED;
         }
-        return connect(m_iSockFd,(struct sockadddr*)&addr,sizeof(addr));
+        return connect(m_iSockFd,(const struct sockaddr*)&addr,sizeof(addr));
     }
     
     struct sockaddr_in6 addr;

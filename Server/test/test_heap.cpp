@@ -32,7 +32,7 @@ int main(void)
     
     for(int i = 0;i< 4;++i)
     {    
-        p = new Timer_t;
+e        p = new Timer_t;
         p->time = random();
         l.push_front(p);
         //v.push_back(p);

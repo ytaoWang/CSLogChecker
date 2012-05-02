@@ -1,6 +1,7 @@
 #ifndef _ERROR_H_
 #define _ERROR_H_
-#include <stdio.h>
+#include <cstdio>
+#include <errno.h>
 /*
 formating code
 0 All attributes off

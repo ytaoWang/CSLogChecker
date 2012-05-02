@@ -10,13 +10,13 @@
 using namespace std;
 
 TCPAgent::TCPAgent(Epoll *epl):m_bActive(true),\
-                               m_iLen(0),m_iConnectTimes(-1)
+                               m_iLen(0)
 {
     m_eEpollEvent.setEpoll(epl);
     this->m_bBufv.setAgent(this);
 }
 
-TCPAgent::TCPAgent(const SocketAddress& oppoAddr,Epoll *epl):m_Addr(oppoAddr),m_iLen(0),m_bActivt(true),m_iConnectTimes(-1)
+TCPAgent::TCPAgent(const SocketAddress& oppoAddr,Epoll *epl):m_Addr(oppoAddr),m_iLen(0),m_bActive(true)
 {
     m_eEpollEvent.setEpoll(epl);
     this->m_bBufv.setAgent(this);
@@ -77,7 +77,7 @@ int TCPAgent::recycler(void)
         handleError(msg.c_str());
     }
 #endif
-    if(m_eEpollEvent.unregisterRWEvents()< 0)
+    if(m_eEpollEvent.unregisterRWEvent()< 0)
     {
         handleError("TCPAgent::recycler");
     }
@@ -116,7 +116,7 @@ int TCPAgent::connect(const SocketAddress &addr)
         return FAILED;
     return SUCCESSFUL;
 }
-xb
+
 int TCPAgent::sendData(void)
 {
     return writeData();
@@ -147,7 +147,7 @@ int TCPAgent::writeData(void)
     return SUCCESSFUL;
 }
 
-int TCPAgent::writeDyncData(char *buf,size_t len,BaseTask *pTask)
+int TCPAgent::writeDynData(char *buf,size_t len,BaseTask *pTask)
 {
     if(this->m_bBufv.writeDynamic(buf,len,pTask) != SUCCESSFUL)
     {
@@ -174,7 +174,7 @@ int TCPAgent::connectAfter(bool result)
     return SUCCESSFUL;
 }
 
-void TCPAgent::setState(void)
+void TCPAgent::setState(int st)
 {
     m_iConnect = CONNECTED;
     if(st == CONNECTED)
