@@ -13,12 +13,13 @@
 
 #include "Error.h"
 #include "BaseHeader.h"
+#include "Slab.h"
 
 class BaseRequest;
 class InReq;
 class SocketAddress;
 
-class Agent 
+class Agent:public Slab<Agent> 
 {
  public:
     Agent():m_iRefCount(0),m_bIsRecycler(false),\
