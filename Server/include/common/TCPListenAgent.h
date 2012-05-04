@@ -1,5 +1,5 @@
-#ifndef _TCP_LISTEN_AGENT_H_
-#define _TCP_LISTENT_AGENT_H_
+#ifndef __TCP_LISTEN_AGENT_H_
+#define __TCP_LISTEN_AGENT_H_
 
 #include "Error.h"
 #include "Agent.h"
@@ -8,6 +8,8 @@
 #include "Epoll.h"
 #include "SocketAddress.h"
 #include "BaseHeader.h"
+#include "Manager.h"
+
 #include <netinet/tcp.h>
 #include <iostream>
 #include <cstring>
@@ -26,9 +28,10 @@ class TCPListenAgent:public Agent
 	Epoll *m_pEpoll;
 
 public:
-	TCPListenAgent(Epoll *ep):m_eEpollEvent(*this,*ep)
+ 	TCPListenAgent(Epoll *ep):m_pEpoll(ep)
 	{
-	  m_pEpoll = ep;
+        m_eEpollEvent.setHandler(this);
+        m_eEpollEvent.setEpoll(ep);
 	}
 	
 	~TCPListenAgent() {}
@@ -59,8 +62,6 @@ int TCPListenAgent<ConcreteAgent>::init(SocketAddress &addr)
 	m_eEpollEvent.setFd(m_tcpListenSocket.getSockFd());
 	m_eEpollEvent.setHandler(this);
 	m_eEpollEvent.registerREvent();
-	
-	this->setState(SERVER);
 	return SUCCESSFUL;
 }
 
@@ -92,7 +93,7 @@ int TCPListenAgent<ConcreteAgent>::recvData(void)
 	}
 
 	ConcreteAgent *agent = \
-			new ConcreteAgent(connSock,peerAddress,m_pEpoll);
+        Manager<ConcreteAgent>::getInstance()->creat(connSock,peerAddress,m_pEpoll);
 	return SUCCESSFUL;
 }
 

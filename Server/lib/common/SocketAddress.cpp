@@ -17,6 +17,9 @@ const int IPV6LEN = 39;
 const int MAXSOCKADDRLEN = 100;
 const char *ANYADDR = "0";
 
+//extern  const char* IPV4ANYADDR;
+//extern const char* IPV6ANYADDR;
+
 int SocketAddress::m_iIpType = IPV4;
 
 SocketAddress::SocketAddress():m_iPort(0),m_strStr("")

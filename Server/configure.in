@@ -19,7 +19,7 @@ CXXFLAGS="$CXXFLAGS -lpthread"
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h netinet/in.h stdint.h stdlib.h string.h sys/socket.h sys/time.h unistd.h])
 
-subdirs2="lib/common test"
+subdirs2="lib/common lib/echo test"
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
@@ -34,5 +34,6 @@ AC_CHECK_FUNCS([bzero gettimeofday inet_ntoa memset socket strerror])
 AC_SUBST(subdirs2)
 AC_CONFIG_FILES([Makefile
  		lib/common/Makefile
+		lib/echo/Makefile
 		test/Makefile])
 AC_OUTPUT

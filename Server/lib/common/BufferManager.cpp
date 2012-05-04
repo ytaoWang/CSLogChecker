@@ -1,4 +1,6 @@
 #include <errno.h>
+#include <list>
+#include <iostream>
 
 #include "BaseTask.h"
 #include "BufferManager.h"
@@ -7,7 +9,9 @@
 #include "Error.h"
 #include "SocketAddress.h"
 #include "Agent.h"
-using namespace std;
+
+//using namespace std;
+//std::list list;
 
 BufferManager::BufferManager():m_pLastIov(NULL),
                                m_pAgent(NULL),
@@ -39,7 +43,7 @@ int BufferManager::writeDynamic(char *buf,size_t len,SocketAddress &addr,BaseTas
 
 int BufferManager::write(UDPSocket& sock)
 {
-    list<iov_req>::iterator aIt,pIt;
+    std::list<iov_req>::iterator aIt,pIt;
     int ret = -1;
     
     aIt = m_lIovList.begin();
@@ -127,7 +131,7 @@ int BufferManager::write(TCPSocket &sock)
     
     memset(outdata,0,reqlen * sizeof(struct iovec));
     
-    list<iov_req>::iterator aIt,pIt;
+    std::list<iov_req>::iterator aIt,pIt;
     aIt = m_lIovList.begin();
     unsigned int num = 0;
     
@@ -355,7 +359,7 @@ int BufferManager::read(UDPSocket &sock)
 
 void BufferManager::handleWriteError(void)
 {
-    list<iov_req>::iterator aIt = m_lIovList.begin();
+    std::list<iov_req>::iterator aIt = m_lIovList.begin();
     while(aIt != m_lIovList.end())
     {
         if(aIt->m_pTask)
@@ -371,7 +375,7 @@ void BufferManager::handleWriteError(void)
 
 int BufferManager::clear(void)
 {
-    list<iov_req>::iterator aIt = m_lIovList.begin();
+    std::list<iov_req>::iterator aIt = m_lIovList.begin();
     while( aIt != m_lIovList.end())
     {
         if(aIt->m_bComplete && aIt->m_Iov.iov_base) 
@@ -397,7 +401,7 @@ BufferManager::~BufferManager()
     try 
     {
         m_pAgent = NULL;
-        list<iov_req>::iterator aIt = m_lIovList.begin();
+        std::list<iov_req>::iterator aIt = m_lIovList.begin();
         while( aIt != m_lIovList.end())
         {
             if(aIt->m_bComplete  && aIt->m_Iov.iov_base)

@@ -1,5 +1,6 @@
 #ifndef __SINGLETON_H_
 #define __SINGLETON_H_
+
 #include <iostream>
 #include <typeinfo>
 
@@ -10,10 +11,12 @@ public:
     static T* getInstance()
     {
         static T t;
-        std::cout << typeid(T).name() << endl;
+        #ifdef DEBUG
+        std::cout << typeid(T).name() << std::endl;
+        #endif
         return &t;
     }
-private:
+protected:
     Singleton()
     {
     }

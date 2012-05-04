@@ -4308,7 +4308,7 @@ fi
 done
 
 
-subdirs2="lib/common test"
+subdirs2="lib/common lib/echo test"
 
 # Checks for typedefs, structures, and compiler characteristics.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for stdbool.h that conforms to C99" >&5
@@ -4509,7 +4509,7 @@ done
 
 
 
-ac_config_files="$ac_config_files Makefile lib/common/Makefile test/Makefile"
+ac_config_files="$ac_config_files Makefile lib/common/Makefile lib/echo/Makefile test/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -5207,6 +5207,7 @@ do
     "include/config.h") CONFIG_HEADERS="$CONFIG_HEADERS include/config.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "lib/common/Makefile") CONFIG_FILES="$CONFIG_FILES lib/common/Makefile" ;;
+    "lib/echo/Makefile") CONFIG_FILES="$CONFIG_FILES lib/echo/Makefile" ;;
     "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
 
   *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;

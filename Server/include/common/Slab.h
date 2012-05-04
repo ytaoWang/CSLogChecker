@@ -1,5 +1,5 @@
-#ifndef __SLAB_H_
-#define __SLAB_H_
+#ifndef ___SLAB_H_
+#define ___SLAB_H_
 
 #include "slab.h"
 #include "Singleton.h"

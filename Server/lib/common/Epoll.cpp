@@ -118,7 +118,7 @@ int Epoll::attachTask(EpollEvent *ptr)
 
 int Epoll::delTask(EpollEvent *ptr)
 {
-    for(list<EpollEvent*>::iterator it = m_lAgentList.begin();it != m_lAgentList.end();++it)
+    for(std::list<EpollEvent*>::iterator it = m_lAgentList.begin();it != m_lAgentList.end();++it)
     {
         if(*it == ptr) 
         {
@@ -229,7 +229,7 @@ void Epoll::run(void)
                         agent->setState(CONNECTED);
                         if(agent->connectAfter(true) < 0)
                         {
-                            delete agent;
+                            agent->release();
                             continue;
                         }
                         agent->resetConnect();
@@ -243,13 +243,13 @@ void Epoll::run(void)
                             {
                                 if(agent->connect(addr) < 0)
                                 {
-                                    delete agent;
+                                    agent->release();
                                 }
                             }
                             else 
                             {
                                 handleError("get peer address error");
-                                delete agent;
+                                agent->release();
                             }
 
                             continue;
@@ -260,7 +260,7 @@ void Epoll::run(void)
                             if(agent->connectAfter(false) < 0)
                             {
                                 handleError("connect error");
-                                delete agent;
+                                agent->release();
                                 continue;
                             }
                             else continue;
@@ -271,19 +271,31 @@ void Epoll::run(void)
                     if(agent->recvData() < 0)
                     {
                         handleError("agent recvData");
-                        delete agent;
+                        agent->release();
                         continue;
                     }
                     
                 }
+                continue;
             }
+
+            if(m_pEpollEvent[i].events & EPOLLIN)
+            {
+                if(agent->recvData() < 0)
+                {
+                    agent->release();
+                    continue;
+                }
+                
+            }
+
             if(m_pEpollEvent[i].events & EPOLLOUT)
             {
                 if(CONNECTED == agent->getState())
                 {
                     if(agent->sendData() < 0)
                     {
-                        delete agent;
+                        agent->release();
                         continue;
                     }
                     
@@ -292,21 +304,11 @@ void Epoll::run(void)
                     agent->setState(CONNECTED);
                     if(agent->connectAfter(true) < 0)
                     {
-                        delete agent;
+                        agent->release();
                         continue;
                     }
                     
                 }
-            }
-            
-            if(m_pEpollEvent[i].events & EPOLLIN)
-            {
-                if(agent->recvData() < 0)
-                {
-                    delete agent;
-                    continue;
-                }
-                
             }
         }
     _task:

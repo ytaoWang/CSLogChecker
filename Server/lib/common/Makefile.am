@@ -9,4 +9,4 @@ libcomm_a_SOURCES = \
 	Error.cpp	\
 	TCPSocket.cpp	\
 	UDPSocket.cpp	\
-	slab.c
+	slab.c		

@@ -4,5 +4,5 @@
 	test.cpp
 bin_PROGRAMS = cslcserver
 cslcserver_SOURCES = test.cpp
-cslcserver_LDADD = $(top_srcdir)/lib/common/libcomm.a
-AM_CPPFLAGS = -I$(top_srcdir)/include/common -lpthread
+cslcserver_LDADD = $(top_srcdir)/lib/common/libcomm.a $(top_srcdir)/lib/echo/libecho.a
+AM_CPPFLAGS = -I$(top_srcdir)/include/common -I$(top_srcdir)/include/echo -lpthread

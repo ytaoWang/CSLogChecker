@@ -12,10 +12,10 @@ const int MAXRECONNECTTIMES = 3;
 const int IPV4 = 4;
 const int IPV6 = 6;
 
-const char* IPV4ANYADDR = "0.0.0";
-const char* IPV6ANYADDR = "::1";
-
-const unsigned int HEADER_SIZE = sizeof(uint32_t) * 5;
+const char* const IPV4ANYADDR = "0.0.0";
+const char* const IPV6ANYADDR = "::1";
+//#define IPV4ANYADDR "0.0.0"
+//#define IPV6ANYADDR "::1"
 
 struct MsgHeader 
 {
@@ -38,4 +38,6 @@ MsgHeader():
 };
 
     
+const unsigned int HEADER_SIZE = sizeof(struct MsgHeader);
+
 #endif
