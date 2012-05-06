@@ -1,4 +1,5 @@
-AM_CPPFLAGS = -I$(top_srcdir)/include/common
+AM_CPPFLAGS = -I$(top_srcdir)/include/common -DDEBUG
+AM_CFLAGS = -lpthread
 lib_LIBRARIES = libcomm.a
 libcomm_a_SOURCES = \
 	BufferManager.cpp \

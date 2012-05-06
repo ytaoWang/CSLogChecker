@@ -12,13 +12,12 @@ protected:
     RunControl()
     {
         m_pEpoll = Singleton<Epoll>::getInstance();
-        m_pEchoListenAgent = new TCPListenAgent<EchoAgent>(m_pEpoll);
+        m_EchoListenAgent.setEpoll(m_pEpoll);
     }
     
     ~RunControl()
     {
         delete m_pEpoll;
-        delete m_pEchoListenAgent;
     }
 	friend class Singleton<RunControl>;
     
@@ -27,7 +26,7 @@ protected:
     void run();
 private:
     Epoll* m_pEpoll;
-    TCPListenAgent<EchoAgent> *m_pEchoListenAgent;
+    TCPListenAgent<EchoAgent> m_EchoListenAgent;
 };
 
 

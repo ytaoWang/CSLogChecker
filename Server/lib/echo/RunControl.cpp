@@ -3,8 +3,8 @@
 void RunControl::init(void)
 {
     m_pEpoll->initialize(100);
-    SocketAddress addr("192.168.1.137",8888);
-    m_pEchoListenAgent->init(addr);
+    SocketAddress addr("127.0.0.1",8888);
+    m_EchoListenAgent.init(addr);
 }
 
 void RunControl::run(void)

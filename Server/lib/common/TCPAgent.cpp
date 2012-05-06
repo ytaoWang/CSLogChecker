@@ -72,7 +72,7 @@ int TCPAgent::recycler(void)
     if(false == m_bActive)
     {
         string ip;
-        ip.assign(m_Adrr.getIP());
+        ip.assign(m_Addr.getIP());
         string msg = "*** Client Closed,IP is "+ip+"****";
         handleError(msg.c_str());
     }

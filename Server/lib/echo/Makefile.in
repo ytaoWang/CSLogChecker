@@ -171,7 +171,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = -I$(top_srcdir)/include/common -I$(top_srcdir)/include/echo
+AM_CPPFLAGS = -I$(top_srcdir)/include/common -I$(top_srcdir)/include/echo -DDEBUG
 lib_LIBRARIES = libecho.a
 libecho_a_SOURCES = \
 	EchoAgent.cpp 	\

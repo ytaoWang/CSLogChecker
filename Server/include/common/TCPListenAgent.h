@@ -28,12 +28,23 @@ class TCPListenAgent:public Agent
 	Epoll *m_pEpoll;
 
 public:
+ 	TCPListenAgent():m_pEpoll(NULL)
+    {
+        m_eEpollEvent.setHandler(this);
+    }
+
  	TCPListenAgent(Epoll *ep):m_pEpoll(ep)
 	{
         m_eEpollEvent.setHandler(this);
         m_eEpollEvent.setEpoll(ep);
 	}
 	
+    void setEpoll(Epoll *epl)
+    {
+        m_pEpoll = epl;
+        m_eEpollEvent.setEpoll(epl);
+    }
+    
 	~TCPListenAgent() {}
 	
 	virtual int init(SocketAddress &);
@@ -81,6 +92,8 @@ int TCPListenAgent<ConcreteAgent>::recvData(void)
 			return FAILED;
 		}
 	}
+
+    cout << "peerAddr" << peerAddress.convertToString() << endl;
 
 	TCPSocket connSock(connfd);
 	if(connSock.setNonblock() <0

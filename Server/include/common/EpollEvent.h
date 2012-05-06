@@ -4,6 +4,8 @@
 #include "TCPSocket.h"
 #include "Agent.h"
 
+#include <cstdlib>
+
 class Epoll;
 class EpollEvent
 {

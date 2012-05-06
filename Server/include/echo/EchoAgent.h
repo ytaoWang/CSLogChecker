@@ -10,6 +10,7 @@ struct MsgHeader;
 
 class EchoAgent:public TCPAgent
 {
+ public:
     EchoAgent(Epoll *epl):TCPAgent(epl)
     {
     }

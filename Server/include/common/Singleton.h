@@ -10,6 +10,11 @@ class Singleton
 public:
     static T* getInstance()
     {
+        /*
+        static T *t = NULL;
+        if(!t)
+            t = new T();
+        */
         static T t;
         #ifdef DEBUG
         std::cout << typeid(T).name() << std::endl;

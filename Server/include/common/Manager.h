@@ -33,7 +33,6 @@ public:
     
 	friend class Singleton<Manager>;
 public:
-    template <typename T>
     T* creat(Epoll *epl)
     {
         T * pT = new T(epl);
@@ -41,26 +40,23 @@ public:
 
         return pT;
     }
-    
-    template <typename T>
-    T* creat(const SocketAddress &,Epoll *)
+
+    T* creat(const SocketAddress &addr,Epoll *epl)
     {
         T *pT = new T(addr,epl);
         m_iNew++;
         
         return pT;
     }
-    
-    template <typename T>
-    T* creat(const TCPSocket &,const SocketAddress &,Epoll *)
+
+    T* creat(const TCPSocket &sock,const SocketAddress &addr,Epoll *epl)
     {
         T *pT = new T(sock,addr,epl);
         m_iNew ++;
     
         return pT;
     }
-    
-    template <typename T>
+
     void recycler(void)
     {
         if(m_listT.empty()) 
@@ -75,8 +71,8 @@ public:
         }
     }
     
-    template <typename T>
-    void recycler(T *)
+
+    void recycler(T *pT)
     {
         if(pT->getRefCount()) 
             return;

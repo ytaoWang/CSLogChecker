@@ -9,6 +9,7 @@ AC_CONFIG_HEADERS([include/config.h])
 AM_INIT_AUTOMAKE([no-dependencies])
 #close optimization
 :${CXXFLAGS="-g -O0 -Werror"}
+:${CFLAGS="-g -O0 -lpthread"}
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC

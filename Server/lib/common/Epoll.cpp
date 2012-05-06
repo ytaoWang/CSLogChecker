@@ -136,6 +136,9 @@ int Epoll::getLastTime(void)
     struct timeval tv;
     unsigned long now;
 
+    if(m_vAgentTimer.empty()) 
+        return TIMER_ACCURACY;
+    
     if(gettimeofday(&tv,NULL) < 0) {
         handleSyscallError("attachTimer");
         return TIMER_ACCURACY;
@@ -199,6 +202,11 @@ void Epoll::run(void)
     while(true)
     {
         timeout = getLastTime();
+
+        //        #ifdef DEBUG
+        //cout << "timeout:" << timeout <<endl;
+        //#endif
+
         if(timeout < 0)
         {
             this->doTimer();
