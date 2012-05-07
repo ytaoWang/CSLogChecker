@@ -29,18 +29,30 @@ class EchoAgent:public TCPAgent,public Slab<EchoAgent>
         :TCPAgent(sock,addr,epl)
     {
         std::cout << "EchoAgent (all)"<<std::endl;
+        if(m_eEpollEvent.registerTimer(2000) < 0) {
+            handleError("EchoAgent::registerTimer");
+        }
+        
     }
 
     void readBack(InReq &req);
     void unpackage(struct MsgHeader &header,const char *msg);
     void package(struct MsgHeader &header,const char *msg);
+    int doTimer(unsigned int tv);
+    ~EchoAgent()
+    {
+        m_eEpollEvent.unregisterTimer(2000);
+    }
+    
     void release(void)
     {
+        #ifdef DEBUG
+        std::cout << "RefCount:"<< m_iRefCount << std::endl;
+        #endif
         --m_iRefCount;
-        if(!m_iRefCount) {
+        if(m_iRefCount == 0) {
             Manager<EchoAgent>::getInstance()->recycler(this);
         }
-        
     }
     
 };

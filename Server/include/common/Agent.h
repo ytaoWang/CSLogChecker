@@ -23,7 +23,7 @@ class SocketAddress;
 class Agent
 {
  public:
-    Agent():m_iRefCount(0),m_bIsRecycler(false),\
+    Agent():m_iRefCount(1),m_bIsRecycler(false),\
             m_iConnect(CONNECTING),m_iConnectTimes(-1)
     {}
     virtual ~Agent()

@@ -68,6 +68,7 @@ class EpollEvent
     
     int registerREvent(void);
     int registerWEvent(void);
+    //ms
     int registerTimer(unsigned int);
     int registerTask(void);
     

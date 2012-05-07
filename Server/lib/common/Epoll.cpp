@@ -95,6 +95,10 @@ int Epoll::delTimer(EpollEvent *ptr,unsigned int time)
     for(vector<struct Timer_t *>::iterator it = m_vAgentTimer.begin();\
         it != m_vAgentTimer.end();++it)
     {
+        #ifdef DEBUG
+        std::cout << "time:" << (*it)->time \
+                  << "ptr:"<< (*it)->ptr << std::endl;
+        #endif
         if(**it == t) {
             m_vAgentTimer.erase(it);
             delete (*it);
@@ -158,7 +162,10 @@ void Epoll::doTask(void)
     for(std::list<EpollEvent *>::iterator it = m_lAgentList.begin();it != m_lAgentList.end();++it)
     {
         pAgent = (*it)->getHandler();
-        pAgent->doTask();
+        if(!pAgent)
+            handleError("Epoll::doTask Agent is null");
+        else
+            pAgent->doTask();
     }
 
     //    Manager<EchoAgent>::getInstance()->recycler();
@@ -172,7 +179,7 @@ void Epoll::doTimer(void)
     struct timeval tv;
     
     if(gettimeofday(&tv,NULL) < 0) {
-        handleSyscallError("attachTimer");
+        handleSyscallError("doTimer");
         return;
     }
 

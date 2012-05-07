@@ -69,7 +69,8 @@ AR = ar
 ARFLAGS = cru
 libecho_a_AR = $(AR) $(ARFLAGS)
 libecho_a_LIBADD =
-am_libecho_a_OBJECTS = EchoAgent.$(OBJEXT) RunControl.$(OBJEXT)
+am_libecho_a_OBJECTS = EchoAgent.$(OBJEXT) EchoTask.$(OBJEXT) \
+	RunControl.$(OBJEXT)
 libecho_a_OBJECTS = $(am_libecho_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/include
 depcomp =
@@ -175,6 +176,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include/common -I$(top_srcdir)/include/echo -DDEBU
 lib_LIBRARIES = libecho.a
 libecho_a_SOURCES = \
 	EchoAgent.cpp 	\
+	EchoTask.cpp	\
 	RunControl.cpp
 
 all: all-am

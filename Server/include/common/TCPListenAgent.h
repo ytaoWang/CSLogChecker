@@ -67,7 +67,7 @@ int TCPListenAgent<ConcreteAgent>::init(SocketAddress &addr)
 		|| m_tcpListenSocket.bindAddr(m_socketAddress) <0
 		|| m_tcpListenSocket.listenOn(LISTEN_NUM) <0)
 	{
-		handleSyscallError("TCPListenAgent::init()");
+		handleFatalError("TCPListenAgent::init()");
 		return FAILED;
 	}
 	

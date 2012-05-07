@@ -14,12 +14,14 @@ TCPAgent::TCPAgent(Epoll *epl):m_bActive(true),\
 {
     m_eEpollEvent.setEpoll(epl);
     this->m_bBufv.setAgent(this);
+    m_eEpollEvent.setHandler(this);
 }
 
 TCPAgent::TCPAgent(const SocketAddress& oppoAddr,Epoll *epl):m_Addr(oppoAddr),m_iLen(0),m_bActive(true)
 {
     m_eEpollEvent.setEpoll(epl);
     this->m_bBufv.setAgent(this);
+    m_eEpollEvent.setHandler(this);
 }
 
 TCPAgent::TCPAgent(const TCPSocket& sock,\

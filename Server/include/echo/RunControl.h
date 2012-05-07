@@ -5,6 +5,7 @@
 #include "Singleton.h"
 #include "Epoll.h"
 #include "TCPListenAgent.h"
+#include "EchoTask.h"
 
 class RunControl : public Singleton<RunControl>
 {
@@ -13,11 +14,12 @@ protected:
     {
         m_pEpoll = Singleton<Epoll>::getInstance();
         m_EchoListenAgent.setEpoll(m_pEpoll);
+        m_pEchoTask = new EchoTask(m_pEpoll);
     }
     
     ~RunControl()
     {
-        delete m_pEpoll;
+        delete m_pEchoTask;
     }
 	friend class Singleton<RunControl>;
     
@@ -27,6 +29,7 @@ protected:
 private:
     Epoll* m_pEpoll;
     TCPListenAgent<EchoAgent> m_EchoListenAgent;
+    EchoTask* m_pEchoTask;
 };
 
 

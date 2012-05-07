@@ -30,6 +30,10 @@ class TCPAgent:public Agent
     {
         return SUCCESSFUL;
     }
+    virtual void release(void)
+    {
+        
+    }
     
     virtual int doPackage(void)
     {

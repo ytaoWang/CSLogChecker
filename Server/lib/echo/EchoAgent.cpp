@@ -11,7 +11,7 @@ using namespace std;
 void EchoAgent::readBack(InReq &req)
 {
     cout << __FUNCTION__ <<endl;
-    unpackage(req.m_msgHeader,req.ioBuf);
+    //unpackage(req.m_msgHeader,req.ioBuf);
 }
 
 void EchoAgent::unpackage(struct MsgHeader &header,const char *msg)
@@ -49,4 +49,19 @@ void EchoAgent::package(struct MsgHeader &header,const char *msg)
     #ifdef DEBUG
     cout << "write msg:"<< msg << endl;
     #endif
+}
+
+int EchoAgent::doTimer(unsigned int tv)
+{
+    std::cout << "EchoAgent Timer::"<< tv << std::endl;
+    struct MsgHeader header;
+    memset(&header,0,sizeof(header));
+    header.length = 5;
+    
+    unpackage(header,"hello");
+    
+    m_eEpollEvent.setPersist(true);
+    
+    return SUCCESSFUL;
+    
 }

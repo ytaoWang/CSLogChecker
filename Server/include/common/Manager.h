@@ -59,22 +59,31 @@ public:
 
     void recycler(void)
     {
+        #ifdef DEBUG
+        std::cout << "Manager::recycler" <<std::endl;
+        #endif
         if(m_listT.empty()) 
             return;
 
         for(typename std::list<T*>::iterator it = m_listT.begin();  \
             it != m_listT.end();)
         {
+            #ifdef DEBUG
+            std::cout << "Agent:" << *it << std::endl;
+            #endif
+            delete *it;
             m_listT.erase(it++);
             m_iFree--;
-            delete it;
+            #ifdef DEBUG
+            std::cout << "Agent:" << *it <<std::endl;
+            #endif
         }
     }
     
 
     void recycler(T *pT)
     {
-        if(pT->getRefCount()) 
+        if(pT->getRefCount() >0) 
             return;
     
         m_listT.push_back(pT);
