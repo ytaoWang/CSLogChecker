@@ -1,10 +1,10 @@
 #ifndef __RUN_CONTROL_H_
 #define __RUN_CONTROL_H_
 
+#include "EchoAgent.h"
 #include "Singleton.h"
 #include "Epoll.h"
 #include "TCPListenAgent.h"
-#include "EchoAgent.h"
 
 class RunControl : public Singleton<RunControl>
 {

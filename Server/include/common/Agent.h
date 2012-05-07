@@ -13,13 +13,14 @@
 
 #include "Error.h"
 #include "BaseHeader.h"
-#include "Slab.h"
+#include "Manager.h"
+//#include "Slab.h"
 
 class BaseRequest;
 class InReq;
 class SocketAddress;
 
-class Agent:public Slab<Agent> 
+class Agent
 {
  public:
     Agent():m_iRefCount(0),m_bIsRecycler(false),\
@@ -39,7 +40,7 @@ class Agent:public Slab<Agent>
     }
     
     virtual void writeBack(bool result) {}
-    virtual void readBack(const InReq &req) { }
+    virtual void readBack(InReq &req) { }
     virtual int doTask(void) {return SUCCESSFUL;}
     virtual int doTimer(unsigned int tv){return SUCCESSFUL;}
     
@@ -86,7 +87,6 @@ class Agent:public Slab<Agent>
     
     virtual void release(void)
     {
-        --m_iRefCount;
     }
     
     int getState(void) const

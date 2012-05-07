@@ -160,6 +160,8 @@ void Epoll::doTask(void)
         pAgent = (*it)->getHandler();
         pAgent->doTask();
     }
+
+    //    Manager<EchoAgent>::getInstance()->recycler();
 }
 
 

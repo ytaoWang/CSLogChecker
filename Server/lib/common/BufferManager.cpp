@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <list>
+#include <typeinfo>
 #include <iostream>
 
 #include "BaseTask.h"
@@ -17,8 +18,8 @@ BufferManager::BufferManager():m_pLastIov(NULL),
                                m_pAgent(NULL),
                                m_iOffset(0),
                                m_iLen(0),
-                               m_bReadHead(false),
-                               m_bInit(false)
+                               m_bReadHead(true),
+                               m_bInit(true)
 {}
 
 int BufferManager::writeDynamic(char *buf,size_t len,BaseTask *pTask)
@@ -156,6 +157,9 @@ int BufferManager::write(TCPSocket &sock)
     }
     
     int download = ret;
+    #ifdef DEBUG
+    std::cout << "send data length:"<< ret << std::endl;
+    #endif
     aIt = m_lIovList.begin();
     while(ret > 0 && aIt != m_lIovList.end())
     {
@@ -219,6 +223,7 @@ int BufferManager::read(TCPSocket &sock)
             m_InReq.ioBuf = NULL;
             memset(&m_InReq.m_msgHeader,0,HEADER_SIZE);
             m_iLen = HEADER_SIZE;
+            m_bInit = false;
         }
         if(m_bReadHead)
         {
@@ -287,6 +292,10 @@ int BufferManager::read(TCPSocket &sock)
                 m_bReadHead = true;
                 if(m_pAgent)
                 {
+                    #ifdef DEBUG
+                    std::cout << "pAgent:"<<typeid(m_pAgent).name()\
+                              <<",addr:"<<m_pAgent<<std::endl;
+                    #endif
                     m_pAgent->readBack(m_InReq);
                     this->m_bInit = true;
                 }

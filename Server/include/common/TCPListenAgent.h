@@ -14,6 +14,7 @@
 #include <iostream>
 #include <cstring>
 #include <errno.h>
+#include <typeinfo>
 
 #define LISTEN_NUM 50
 
@@ -107,6 +108,9 @@ int TCPListenAgent<ConcreteAgent>::recvData(void)
 
 	ConcreteAgent *agent = \
         Manager<ConcreteAgent>::getInstance()->creat(connSock,peerAddress,m_pEpoll);
+    #ifdef DEBUG
+    cout << "agent:"<<agent<<",type:"<<typeid(agent).name()<<endl;
+    #endif
 	return SUCCESSFUL;
 }
 

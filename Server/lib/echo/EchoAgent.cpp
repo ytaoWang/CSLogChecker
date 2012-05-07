@@ -8,8 +8,9 @@
 
 using namespace std;
 
-void EchoAgent::readBack(struct InReq &req)
-{    
+void EchoAgent::readBack(InReq &req)
+{
+    cout << __FUNCTION__ <<endl;
     unpackage(req.m_msgHeader,req.ioBuf);
 }
 
@@ -29,15 +30,23 @@ void EchoAgent::package(struct MsgHeader &header,const char *msg)
         handleError("header'length(%d) don't equal to msg(%d)\n",header.length,strlen(msg));
     }
     
-    char *pBuf = new char[sizeof(header) + len];
-    memset(pBuf, 0,sizeof(header) + len);
+    char *pBuf = new char[sizeof(struct MsgHeader) + len];
+    memset(pBuf, 0,sizeof(MsgHeader) + len);
+    
+    #ifdef DEBUG
+    cout << "header length:" << sizeof(header) << endl;
+    #endif
     
     memcpy(pBuf,&header,sizeof(header));
     
-    if(!len) 
+    if(len) 
         memcpy(pBuf + sizeof(header),msg,len);
     
     if(this->writeDynData(pBuf,sizeof(header) + len,NULL) < 0) {
         cout << "------------>" << endl;
     }
+
+    #ifdef DEBUG
+    cout << "write msg:"<< msg << endl;
+    #endif
 }

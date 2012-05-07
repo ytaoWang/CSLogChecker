@@ -53,6 +53,7 @@ class BufferManager
     void setAgent(Agent *agent)
     {
         m_pAgent = agent;
+        std::cout << "setAgent agent:" << m_pAgent <<std::endl;
     }
     void handleWriteError(void);
     int clear(void);
