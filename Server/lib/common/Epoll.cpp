@@ -100,8 +100,8 @@ int Epoll::delTimer(EpollEvent *ptr,unsigned int time)
                   << "ptr:"<< (*it)->ptr << std::endl;
         #endif
         if(**it == t) {
-            m_vAgentTimer.erase(it);
             delete (*it);
+            m_vAgentTimer.erase(it);
             break;
         }
     }
@@ -151,7 +151,9 @@ int Epoll::getLastTime(void)
     make_heap(m_vAgentTimer.begin(),m_vAgentTimer.end(),Epoll::CompareTimer());
     
     now = tv.tv_sec * 1000 + tv.tv_usec/1000;
-    
+    #ifdef DEBUG
+    std::cout << "last time:" << m_vAgentTimer[0]->absolute << ",now:" << now << std::endl;
+    #endif
     return m_vAgentTimer[0]->absolute - now;
 }
 
@@ -193,7 +195,11 @@ void Epoll::doTimer(void)
             if((*it)->ptr->isPersist()) {
                 //update absolute
                 (*it)->absolute = now + (*it)->time;
-            } else {
+                #ifdef DEBUG
+                std::cout << "absolute:" << (*it)->absolute << std::endl;
+                #endif
+            }
+            else {
                 m_vAgentTimer.erase(it);
             }   
         }
@@ -222,6 +228,9 @@ void Epoll::run(void)
             continue;
         }
         
+        if((timeout == TIMER_ACCURACY) && m_vAgentTimer.empty())
+            timeout = -1;
+        
         if((nfds = epoll_wait(m_iEpollFd,m_pEpollEvent,m_iEventSize,timeout)) < 0)
         {
             if(errno == EINTR) continue;
@@ -246,6 +255,7 @@ void Epoll::run(void)
                         agent->setState(CONNECTED);
                         if(agent->connectAfter(true) < 0)
                         {
+                            agent->recycler();
                             agent->release();
                             continue;
                         }
@@ -260,12 +270,14 @@ void Epoll::run(void)
                             {
                                 if(agent->connect(addr) < 0)
                                 {
+                                    agent->recycler();
                                     agent->release();
                                 }
                             }
                             else 
                             {
                                 handleError("get peer address error");
+                                agent->recycler();
                                 agent->release();
                             }
 
@@ -277,6 +289,7 @@ void Epoll::run(void)
                             if(agent->connectAfter(false) < 0)
                             {
                                 handleError("connect error");
+                                agent->recycler();
                                 agent->release();
                                 continue;
                             }
@@ -288,6 +301,7 @@ void Epoll::run(void)
                     if(agent->recvData() < 0)
                     {
                         handleError("agent recvData");
+                        agent->recycler();
                         agent->release();
                         continue;
                     }
@@ -300,6 +314,7 @@ void Epoll::run(void)
             {
                 if(agent->recvData() < 0)
                 {
+                    agent->recycler();
                     agent->release();
                     continue;
                 }
@@ -312,6 +327,7 @@ void Epoll::run(void)
                 {
                     if(agent->sendData() < 0)
                     {
+                        agent->recycler();
                         agent->release();
                         continue;
                     }
@@ -321,6 +337,7 @@ void Epoll::run(void)
                     agent->setState(CONNECTED);
                     if(agent->connectAfter(true) < 0)
                     {
+                        agent->recycler();
                         agent->release();
                         continue;
                     }

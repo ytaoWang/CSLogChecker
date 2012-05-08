@@ -20,6 +20,7 @@ public:
         std::cout << typeid(T).name() << std::endl;
         #endif
         return &t;
+        //return t;
     }
 protected:
     Singleton()

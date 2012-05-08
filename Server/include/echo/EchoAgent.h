@@ -39,6 +39,11 @@ class EchoAgent:public TCPAgent,public Slab<EchoAgent>
     void unpackage(struct MsgHeader &header,const char *msg);
     void package(struct MsgHeader &header,const char *msg);
     int doTimer(unsigned int tv);
+    int recycler(void)
+    {
+        TCPAgent::recycler();
+    }
+    
     ~EchoAgent()
     {
         m_eEpollEvent.unregisterTimer(2000);

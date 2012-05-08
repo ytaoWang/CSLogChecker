@@ -55,7 +55,7 @@ class Agent
         return SUCCESSFUL;
     }
     
-    virtual int recyler(void)
+    virtual int recycler(void)
     {
         m_bIsRecycler = true;
         return SUCCESSFUL;

@@ -213,7 +213,9 @@ int EpollEvent::registerTimer(unsigned int tv)
     
     m_iTTEvent |= TIMER_EVENT;
     m_iTv = tv;
-    
+    #ifdef DEBUG
+    std::cout << "TTEvent:" << m_iTTEvent << std::endl;
+    #endif
     return SUCCESSFUL;
 }
 
@@ -221,6 +223,9 @@ int EpollEvent::unregisterTimer(unsigned int tv)
 {
     if(!tv) return SUCCESSFUL;
     
+    #ifdef DEBUG
+    std::cout << "TTEvent:" << m_iTTEvent << std::endl;
+    #endif
     if(!(m_iTTEvent & TIMER_EVENT)) return SUCCESSFUL;
     
     if(m_pEpoll->delTimer(this,tv)  < 0)

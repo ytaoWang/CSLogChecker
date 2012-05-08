@@ -59,6 +59,9 @@ TCPAgent::~TCPAgent()
     {
         handleError("TCPAgent::TCPAgent");
     }
+
+    m_eEpollEvent.setFd(-1);
+    m_eEpollEvent.setHandler(NULL);
 }
 
 int TCPAgent::recycler(void)
@@ -83,9 +86,9 @@ int TCPAgent::recycler(void)
     {
         handleError("TCPAgent::recycler");
     }
+
+    m_eEpollEvent.unregisterTask();
     
-    m_eEpollEvent.setFd(-1);
-    m_eEpollEvent.setHandler(NULL);
     if(this->m_tTcpSocket.closeSocket() < 0)
         handleError("TCPAgent::recycler");
     return SUCCESSFUL;
