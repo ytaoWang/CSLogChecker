@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "wait_queue.h"
+
 template <typename T>
 class Queue {
     struct Node 
@@ -21,12 +23,15 @@ class Queue {
     pthread_mutex_t tlock;
     struct Node s;//satellite node
     unsigned int size;
+    wait_queue_t wait;
+    
 public:
     Queue():head(&s),tail(&s),size(0)
     {
         //hlock(PTHREAD_MUTEX_INITIALIZER),tlock(PTHREAD_MUTEX_INITIALIZER)
         hlock = PTHREAD_MUTEX_INITIALIZER;
         tlock = PTHREAD_MUTEX_INITIALIZER;
+        wait_queue_init(&wait);
     }
     
     int enQueue(const T & elem)
@@ -42,6 +47,12 @@ public:
         
         pthread_mutex_unlock(&tlock);
         
+        /*
+        #ifdef DEBUG
+        std::cout << "a element has put into queue." << std::endl;
+        #endif
+        */
+        wait_queue_up_nonblock(&wait);
         __sync_fetch_and_add(&size,1);
         
         return 0;
@@ -51,24 +62,28 @@ public:
     int deQueue(T *t)
     {
         struct Node *h1,*h2;
+        int size;
         
         if(!t) return -1;
         
+    __again: 
         pthread_mutex_lock(&hlock);
 
         h1 = head;
         h2 = h1->next;
         if(!h2) {
             pthread_mutex_unlock(&hlock);
-            #ifdef DEBUG
-            std::cout << "queue is empty" << std::endl;
-            #endif
-            return -1;
+            
+            wait_queue_size(&wait,&size);
+            wait_queue_down(&wait);
+
+            goto __again;
+            //return -1;
         }
         
         *t = h2->value;
         head = h2;
-        
+
         pthread_mutex_unlock(&hlock);
         
         __sync_fetch_and_sub(&size,1);
@@ -88,6 +103,8 @@ public:
         T t;
         while(0 == deQueue(&t))
             ;
+        
+        wait_queue_destroy(&wait);
     }
     
 };

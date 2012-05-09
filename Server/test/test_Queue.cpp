@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <semaphore.h>
+#include <sys/time.h>
 
 #include "Queue.h"
 
@@ -12,6 +13,8 @@ Queue<unsigned long> queue;
 
 static int global1,global2;
 static sem_t finish;
+static int tnum2;
+struct timeval tv1,tv2;
 
 const int NUM = 100000;
 
@@ -28,7 +31,23 @@ void* execute1(void *value)
     
     while(queue.deQueue(&v) == 0) {
         i ++ ;
-        __sync_fetch_and_add(&global1,1);
+        if(__sync_add_and_fetch(&global1,1) == NUM * tnum2) {    
+            
+            //#ifdef DEBUG
+            gettimeofday(&tv2,NULL);
+            cout << "producer:" << global1 << endl;
+            cout << "sec:" << (tv2.tv_sec - tv1.tv_sec) << ",tv1 usec:"<< tv1.tv_usec << ",tv2 usec:"<< tv2.tv_usec << endl;
+            double d;
+            
+            d = ((tv2.tv_sec - tv1.tv_sec) * 1000000 + (tv2.tv_usec - tv1.tv_usec))/1000000.00;
+            
+            cout << "sec:" << d << endl;
+            
+			//#endif
+            exit(0);
+            
+            break;
+        }
     }
     
     #ifdef DEBUG
@@ -73,12 +92,14 @@ int main(int argc,char *argv[])
         return -1;
     }
    
-    sem_init(&finish,0,0);
+    //sem_init(&finish,0,0);
     
     tnum = atoi(argv[1]);
-    int tnum2 = atoi(argv[2]);
+    tnum2 = atoi(argv[2]);
 
     pthread_t tid[tnum + tnum2];
+    
+    gettimeofday(&tv1,NULL);
 
     for(int i = 0;i < tnum2;++i) 
     {
@@ -87,11 +108,7 @@ int main(int argc,char *argv[])
             cout << "create producer thread error." << endl;
         }
     }
-    
-    for(int i = 0 ;i < tnum2 ; ++i) {
-        pthread_join(tid[i+tnum],NULL);
-    }
-    
+   
     //sem_post(&finish);
     
     for(int i = 0;i < tnum;++i) 
@@ -105,8 +122,16 @@ int main(int argc,char *argv[])
     for(int i = 0; i < tnum;++i)
         pthread_join(tid[i],NULL);
 
-    sem_destroy(&finish);
+    for(int i = 0 ;i < tnum2 ; ++i) { 
+       pthread_join(tid[i+tnum],NULL);
+    }
+ 
     
+    
+    //sem_destroy(&finish);
     cout << "consumer:" << global1 << ",producer:"<< global2 << endl;
+    gettimeofday(&tv2,NULL);
+    
+    cout << "sec:" << (tv2.tv_sec - tv1.tv_sec) << ",tv 1 usec:" << tv1.tv_usec << ",tv2 usec:"<< tv2.tv_usec << endl;
     return 0;
 }
